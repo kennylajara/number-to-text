@@ -2,3 +2,6 @@
 _test
 _submissions/
 .idea/
+venv/
+.env
+*/__pycache__/*
