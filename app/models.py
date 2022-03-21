@@ -1,7 +1,18 @@
-import sys
 from typing import Optional
 
+from pydantic import BaseModel, Field
+
 from app.database import conn
+
+
+class GeoJsonLocation(BaseModel):
+    coordinates: tuple[float, float]
+    type: str
+
+
+class GeoJsonPayload(BaseModel):
+    distance: float = Field(..., gt=0.0)
+    location: GeoJsonLocation
 
 
 class Property:
@@ -19,7 +30,11 @@ class Property:
     def get_by_id(self, id: str) -> None:
         cur = conn.cursor()
         cur.execute(
-            """SELECT id, geocode_geo, parcel_geo, building_geo, image_bounds, image_url FROM properties WHERE id = %s""",
+            """
+                SELECT id, geocode_geo, parcel_geo, building_geo, image_bounds, image_url 
+                FROM properties 
+                WHERE id = %s
+            """,
             (id,),
         )
         result = cur.fetchone()
@@ -66,6 +81,40 @@ class Property:
     @property
     def image_path(self) -> Optional[str]:
         return self._get_image_path(self._id)
+
+    @staticmethod
+    def find_by_geocode_geo(geojson: GeoJsonPayload) -> Optional[list]:
+
+        point_lon, point_lat = geojson.location.coordinates
+        distance_threshold = geojson.distance
+
+        # Look for properties within distance_threshold of point
+        cur = conn.cursor()
+        cur.execute(
+            """
+                SELECT id, geocode_geo, parcel_geo, building_geo, image_bounds, image_url 
+                FROM properties 
+                WHERE ST_DWithin(geocode_geo, ST_GeomFromText(%s, 4326), %s)
+            """,
+            (f"POINT({point_lon} {point_lat})", distance_threshold),
+        )
+        result = cur.fetchall()
+
+        if not result:
+            return []
+
+        # Return properties
+        return [
+            {
+                "id": row[0],
+                "geocode_geo": row[1],
+                "parcel_geo": row[2],
+                "building_geo": row[3],
+                "image_bounds": row[4],
+                "image_url": row[5],
+            }
+            for row in result
+        ]
 
     def _get_image_path(self, id: Optional[str]):
         if not id:

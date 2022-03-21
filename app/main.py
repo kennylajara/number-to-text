@@ -1,12 +1,13 @@
 import os
+from turtle import distance
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from PIL import Image
 import requests
 
-from app.property import Property
-
+from app.models import Property, GeoJsonPayload
+from app.database import conn
 
 app = FastAPI()
 
@@ -31,3 +32,12 @@ def read_root(id: str):
         return FileResponse(image_path, media_type="image/jpg")
 
     raise HTTPException(status_code=404, detail="Image not found on cloud storage")
+
+
+@app.post("/find")
+def find_property(geojson: GeoJsonPayload):
+    # Find property by geocode_geo
+    if geojson.location.type != "Point":
+        raise HTTPException(status_code=400, detail="Invalid location type")
+
+    return Property.find_by_geocode_geo(geojson)
