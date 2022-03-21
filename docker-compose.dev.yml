@@ -2,9 +2,13 @@ version: '3'
 
 services:
   api:
+    build: 
+      target: dev
     command: uvicorn app.main:app --host 0.0.0.0 --port 3000 --reload
     volumes:
      - ./app:/code/app
+     - ./tests:/code/tests
+     - ./mypy.ini:/code/mypy.ini
 
 volumes:
   pg-data:

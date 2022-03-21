@@ -4,4 +4,4 @@ _submissions/
 .idea/
 venv/
 .env
-*/__pycache__/*
+**/__pycache__/*

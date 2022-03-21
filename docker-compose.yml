@@ -14,7 +14,10 @@ services:
       - ./init-db/:/docker-entrypoint-initdb.d/
       - pg-data:/var/lib/postgresql/data
   api:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: base
     ports:
       - "3000:3000"
     environment:

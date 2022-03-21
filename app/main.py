@@ -1,16 +1,33 @@
-from typing import Optional
+import os
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from PIL import Image
+import requests
+
+from app.property import Property
+
 
 app = FastAPI()
 
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+@app.get("/display/{id}")
+def read_root(id: str):
+    # Select image from database
+    prop = Property(id)
 
+    if prop.image_url is None:
+        raise HTTPException(status_code=404, detail="Image not found in database")
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
-    return {"item_id": item_id, "q": q}
+    # Return image if already downloaded
+    image_path = str(prop.image_path)
+    if os.path.exists(image_path):
+        return FileResponse(image_path, media_type="image/jpg")
 
+    # Download image
+    res = requests.get(prop.image_url, stream=True)
+    if res.status_code == 200:
+        Image.open(res.raw).convert("RGB").save(image_path)
+        return FileResponse(image_path, media_type="image/jpg")
+
+    raise HTTPException(status_code=404, detail="Image not found on cloud storage")
