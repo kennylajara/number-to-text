@@ -1,5 +1,4 @@
 import os
-from turtle import distance
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
@@ -41,3 +40,14 @@ def find_property(geojson: GeoJsonPayload):
         raise HTTPException(status_code=400, detail="Invalid location type")
 
     return Property.find_by_geocode_geo(geojson)
+
+
+@app.get("/statistics/{id}")
+def get_statistics(id: str, zone_size_m: int = 10):
+    # Get statistics for a property
+    prop = Property(id)
+    stats = prop.get_statistics(zone_size_m)
+    if stats is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    return stats

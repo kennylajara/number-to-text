@@ -1,4 +1,6 @@
+from tkinter.messagebox import NO
 from typing import Optional
+from xml.sax.handler import all_properties
 
 from pydantic import BaseModel, Field
 
@@ -13,6 +15,14 @@ class GeoJsonLocation(BaseModel):
 class GeoJsonPayload(BaseModel):
     distance: float = Field(..., gt=0.0)
     location: GeoJsonLocation
+
+
+class Statistics(BaseModel):
+    id: str
+    parcel_area_sqm: float
+    building_area_sqm: float
+    building_distance_m: float
+    zone_density: float
 
 
 class Property:
@@ -115,6 +125,32 @@ class Property:
             }
             for row in result
         ]
+
+    def get_statistics(self, zone_size_m: int = 10) -> Optional[Statistics]:
+        """Returns various statistics for parcels and buildings found X meters around the requested property"""
+        query_statitics = f"""
+            SELECT 
+                ST_Area(parcel_geo),
+                ST_Area(building_geo),
+                ST_Distance(geocode_geo, ST_Centroid(building_geo)),
+                ST_Area(building_geo)/ST_Area(ST_Buffer(geocode_geo, {zone_size_m}))   
+            FROM properties  AS p
+            WHERE p.id = '{self._id}'
+        """
+        cur = conn.cursor()
+        cur.execute(query_statitics)
+        result = cur.fetchone()
+
+        if not result:
+            return None
+
+        return Statistics(
+            id=self._id,
+            parcel_area_sqm=result[0],
+            building_area_sqm=result[1],
+            building_distance_m=result[2],
+            zone_density=result[3],
+        )
 
     def _get_image_path(self, id: Optional[str]):
         if not id:

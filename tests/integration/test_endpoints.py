@@ -141,3 +141,43 @@ def test_endpoint_find_with_valid_data_and_result():
             "image_url": "https://storage.googleapis.com/engineering-test/images/3290ec7dd190478aab124f6f2f32bdd7.tif",
         }
     ]
+
+
+#
+#  GET /statistics/{id}
+#
+
+
+def test_endpoint_statistics_with_non_existing_id():
+    response = client.get("/statistics/invalid")
+    assert response.status_code == 404
+    assert response.headers["content-type"] == "application/json"
+    assert response.json() == {"detail": "Property not found"}
+
+
+def test_endpoint_statistics_with_existing_id():
+    response = client.get("/statistics/f853874999424ad2a5b6f37af6b56610")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/json"
+    assert response.json() == {
+        "id": "f853874999424ad2a5b6f37af6b56610",
+        "parcel_area_sqm": 1493.818154175693,
+        "building_area_sqm": 728.4045420035836,
+        "building_distance_m": 8.69754852,
+        "zone_density": 2.332165709432774,
+    }
+
+
+def test_endpoint_statistics_with_zone_size_m():
+    response = client.get(
+        "/statistics/f853874999424ad2a5b6f37af6b56610?zone_size_m=100"
+    )
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/json"
+    assert response.json() == {
+        "id": "f853874999424ad2a5b6f37af6b56610",
+        "parcel_area_sqm": 1493.818154175693,
+        "building_area_sqm": 728.4045420035836,
+        "building_distance_m": 8.69754852,
+        "zone_density": 0.023321657486992376,
+    }
