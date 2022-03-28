@@ -108,7 +108,7 @@ JSON object including following fields
 
 ## Development
 
-To deploy for development environment:
+To deploy for development environment, make a copy of `.env-sample` and name it `.env`. Then, run de following command:
 
 ```
 make dev
@@ -128,7 +128,7 @@ make stop
 
 ## Deploy
 
-To deploy on a production environment, run the following command:
+To deploy on a production environment, make a copy of `.env-sample`, name it `.env` and change the value of the database credentials. Then, run the following command:
 
 ```
 make up
