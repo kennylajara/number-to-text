@@ -1,6 +1,9 @@
 version: '3'
 
 services:
+
+  # TODO: Add Nginx as proxy
+
   postgres:
     image: postgis/postgis:13-master
     restart: always
@@ -13,6 +16,7 @@ services:
     volumes:
       - ./init-db/:/docker-entrypoint-initdb.d/
       - pg-data:/var/lib/postgresql/data
+
   api:
     build: 
       context: .

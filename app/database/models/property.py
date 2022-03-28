@@ -75,7 +75,7 @@ class PropertyModel:
         )
 
     @staticmethod
-    def find_by_geocode_geo(geojson: GeoJsonPayload) -> Optional[list]:
+    def find_by_geocode_geo(geojson: GeoJsonPayload) -> Optional[list[dict[str, str]]]:
 
         point_lon, point_lat = geojson.location.coordinates
         distance_threshold = geojson.distance

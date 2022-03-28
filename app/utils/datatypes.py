@@ -1,19 +1,19 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, NonNegativeFloat
 
 
 class GeoJsonLocation(BaseModel):
-    coordinates: tuple[float, float]
+    coordinates: list[float] = Field(..., alias="coordinates")
     type: str
 
 
 class GeoJsonPayload(BaseModel):
-    distance: float = Field(..., gt=0.0)
+    distance: NonNegativeFloat
     location: GeoJsonLocation
 
 
 class Statistics(BaseModel):
     id: str
-    parcel_area_sqm: float = Field(..., gt=0.0)
-    building_area_sqm: float = Field(..., gt=0.0)
-    building_distance_m: float = Field(..., gt=0.0)
-    zone_density: float = Field(..., gt=0.0)
+    parcel_area_sqm: NonNegativeFloat
+    building_area_sqm: NonNegativeFloat
+    building_distance_m: NonNegativeFloat
+    zone_density: NonNegativeFloat

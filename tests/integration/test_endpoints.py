@@ -65,12 +65,6 @@ def test_endpoint_find_with_invalid_geojson_coordinates():
                 "msg": "field required",
                 "type": "value_error.missing",
             },
-            {
-                "loc": ["body", "location", "coordinates"],
-                "msg": "wrong tuple length 0, expected 2",
-                "type": "value_error.tuple.length",
-                "ctx": {"actual_length": 0, "expected_length": 2},
-            },
         ]
     }
 
@@ -86,9 +80,9 @@ def test_endpoint_find_with_invalid_distance():
         "detail": [
             {
                 "loc": ["body", "distance"],
-                "msg": "ensure this value is greater than 0.0",
-                "type": "value_error.number.not_gt",
-                "ctx": {"limit_value": 0.0},
+                "msg": "ensure this value is greater than or equal to 0",
+                "type": "value_error.number.not_ge",
+                "ctx": {"limit_value": 0},
             }
         ]
     }
