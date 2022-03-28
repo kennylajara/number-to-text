@@ -1,18 +1,9 @@
-import os
-
 from fastapi.testclient import TestClient
 
 from app.main import app
 
 
 client = TestClient(app)
-
-
-@app.on_event("startup")
-def startup():
-    filename = "/tmp/f853874999424ad2a5b6f37af6b56610.jpg"
-    if os.path.exists(filename):
-        os.remove(filename)
 
 
 #
@@ -24,7 +15,7 @@ def test_endpoint_display_with_non_existing_id():
     response = client.get("/display/invalid")
     assert response.status_code == 404
     assert response.headers["content-type"] == "application/json"
-    assert response.json() == {"detail": "Image not found in database"}
+    assert response.json() == {"detail": "Image not found"}
 
 
 def test_endpoint_display_with_existing_id():
