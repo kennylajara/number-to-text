@@ -1,12 +1,11 @@
 import os
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 from PIL import Image
 import requests
 
 from app.models import Property, GeoJsonPayload
-from app.database import conn
 
 app = FastAPI()
 
@@ -51,3 +50,13 @@ def get_statistics(id: str, zone_size_m: int = 10):
         raise HTTPException(status_code=404, detail="Property not found")
 
     return stats
+
+
+@app.get("/list")
+def get_all(size: int = Query(10, ge=1, le=1000), page: int = Query(1, ge=1)):
+    # Get list of properties
+    props = Property.get_all(size, page)
+    if props is None:
+        raise HTTPException(status_code=404, detail="No properties found")
+
+    return props

@@ -181,3 +181,125 @@ def test_endpoint_statistics_with_zone_size_m():
         "building_distance_m": 8.69754852,
         "zone_density": 0.023321657486992376,
     }
+
+
+#
+#  GET /list
+#
+
+
+def test_endpoint_list():
+    response = client.get("/list")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/json"
+    assert response.json() == [
+        "f1650f2a99824f349643ad234abff6a2",
+        "f853874999424ad2a5b6f37af6b56610",
+        "3290ec7dd190478aab124f6f2f32bdd7",
+        "5e25c841f0ca47ac8215b5fd0076259a",
+        "622088210a6f43fca2a1824e8610df03",
+    ]
+
+
+def test_endpoint_list_with_page_lower_than_min_page():
+    response = client.get("/list?page=0")
+    assert response.status_code == 422
+    assert response.headers["content-type"] == "application/json"
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": ["query", "page"],
+                "msg": "ensure this value is greater than or equal to 1",
+                "type": "value_error.number.not_ge",
+                "ctx": {"limit_value": 1},
+            }
+        ]
+    }
+
+
+def test_endpoint_list_with_size_lower_than_min_size():
+    response = client.get("/list?size=0")
+    assert response.status_code == 422
+    assert response.headers["content-type"] == "application/json"
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": ["query", "size"],
+                "msg": "ensure this value is greater than or equal to 1",
+                "type": "value_error.number.not_ge",
+                "ctx": {"limit_value": 1},
+            }
+        ]
+    }
+
+
+def test_endpoint_list_with_page_greater_than_max_size():
+    response = client.get("/list?size=1001")
+    assert response.status_code == 422
+    assert response.headers["content-type"] == "application/json"
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": ["query", "size"],
+                "msg": "ensure this value is less than or equal to 1000",
+                "type": "value_error.number.not_le",
+                "ctx": {"limit_value": 1000},
+            }
+        ]
+    }
+
+
+def test_endpoint_list_with_correct_page_and_size_parameters():
+    tests = [
+        {
+            "size": 2,
+            "page": 1,
+            "results": [
+                "f1650f2a99824f349643ad234abff6a2",
+                "f853874999424ad2a5b6f37af6b56610",
+            ],
+        },
+        {
+            "size": 2,
+            "page": 2,
+            "results": [
+                "3290ec7dd190478aab124f6f2f32bdd7",
+                "5e25c841f0ca47ac8215b5fd0076259a",
+            ],
+        },
+        {
+            "size": 2,
+            "page": 3,
+            "results": ["622088210a6f43fca2a1824e8610df03"],
+        },
+        {
+            "size": 3,
+            "page": 1,
+            "results": [
+                "f1650f2a99824f349643ad234abff6a2",
+                "f853874999424ad2a5b6f37af6b56610",
+                "3290ec7dd190478aab124f6f2f32bdd7",
+            ],
+        },
+        {
+            "size": 3,
+            "page": 2,
+            "results": [
+                "5e25c841f0ca47ac8215b5fd0076259a",
+                "622088210a6f43fca2a1824e8610df03",
+            ],
+        },
+    ]
+
+    for test in tests:
+        response = client.get(f"/list?page={test['page']}&size={test['size']}")
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "application/json"
+        assert response.json() == test["results"]
+
+
+def test_endpoint_list_with_no_results():
+    response = client.get("/list?page=100&size=100")
+    assert response.status_code == 404
+    assert response.headers["content-type"] == "application/json"
+    assert response.json() == {"detail": "No properties found"}

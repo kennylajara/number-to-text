@@ -126,6 +126,24 @@ class Property:
             for row in result
         ]
 
+    @staticmethod
+    def get_all(size: int, page: int) -> Optional[list[str]]:
+        cur = conn.cursor()
+        cur.execute(
+            """
+                SELECT id 
+                FROM properties 
+                LIMIT %s OFFSET %s
+            """,
+            (size, size * (page - 1)),
+        )
+        result = cur.fetchall()
+
+        if not result:
+            return None
+
+        return [row[0] for row in result]
+
     def get_statistics(self, zone_size_m: int = 10) -> Optional[Statistics]:
         """Returns various statistics for parcels and buildings found X meters around the requested property"""
         query_statitics = f"""
@@ -134,7 +152,7 @@ class Property:
                 ST_Area(building_geo),
                 ST_Distance(geocode_geo, ST_Centroid(building_geo)),
                 ST_Area(building_geo)/ST_Area(ST_Buffer(geocode_geo, {zone_size_m}))   
-            FROM properties  AS p
+            FROM properties AS p
             WHERE p.id = '{self._id}'
         """
         cur = conn.cursor()
