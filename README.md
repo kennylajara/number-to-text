@@ -139,5 +139,3 @@ To stop de containers run:
 ```
 make down
 ```
-
-## Other commnads
