@@ -2,6 +2,8 @@
 
 API created as Technical Assessment to apply for the Backend Developer position at [Zesty.ai](https://zesty.ai).
 
+**[Working demo](http://45.79.199.22/)**
+
 ## Requirments
 
 - [Docker](https://docs.docker.com/engine/install/)
@@ -10,10 +12,7 @@ API created as Technical Assessment to apply for the Backend Developer position 
 
 ## API Specification
 
-The API must adhere to the following API specification.
-
-Note that this includes the specification for all endpoints.
-Ignore the ones for features that are not implemented in the submission.
+You will find the the API documentation at the root directory.
 
 ---
 
